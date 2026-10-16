@@ -1,6 +1,6 @@
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { FastifyPluginAsync } from "fastify/types/plugin.js";
-import { Room, RoomBody, RoomBodyType, RoomType } from "../schema/room.ts";
+import { Room, RoomBody, RoomType } from "../schema/room.ts";
 import { Type } from 'typebox'
 
 type Room = { id: number ; name: string ; capacity: number }
