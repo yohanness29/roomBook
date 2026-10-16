@@ -4,7 +4,6 @@ export const RoomBody = Type.Object({
     name: Type.String({minLength: 1}),
     capacity: Type.Integer({minimum: 1})
 })
-
 export type RoomBodyType = Static<typeof RoomBody>
 
 export const Room = Type.Object({
@@ -13,3 +12,4 @@ export const Room = Type.Object({
     capacity: Type.Integer()
 })
 export type RoomType = Static<typeof Room>
+

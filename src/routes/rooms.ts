@@ -1,6 +1,7 @@
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { FastifyPluginAsync } from "fastify/types/plugin.js";
-import { Room, RoomBody, RoomType } from "../schema/room.ts";
+import { Room, RoomBody, RoomBodyType, RoomType } from "../schema/room.ts";
+import { Type } from 'typebox'
 
 type Room = { id: number ; name: string ; capacity: number }
 
@@ -15,26 +16,52 @@ let rooms: Room[] = [
 ]
 let nextId = 8
 
+const roomPatchWhitelist= ['name', 'capacity']
+
 export const roomsRoutes: FastifyPluginAsync = async (app) => {
     const typed = app.withTypeProvider<TypeBoxTypeProvider>()
-    typed.post('/', {schema: { body: RoomBody,/* response: Room*/ }}, async(request, reply) =>{
+    typed.get('/', { schema: { 
+                        querystring: Type.Object({
+                            minCapacity: Type.Optional(Type.Integer({minimum:1}))},
+                            {additionalProperties: false}) 
+                        }}, async(request, reply)=> {
+        const {minCapacity} = request.query
+        if(minCapacity) return rooms.filter((r)=>r.capacity >= minCapacity )
+        return rooms
+    })
+    typed.get('/:id', { schema: {
+                            response: {
+                                200: Room, 
+                                404: Type.Object({error: Type.String()})
+                            }, 
+                            params: Type.Object({ id: Type.String({minLength: 1})})
+                        }}, async(request, reply) =>{
+        const { id } = request.params
+        const room = rooms.find((r) => r.id === Number(id))
+        if (!room) { return reply.status(404).send({ error: "Room not found" }) }
+        return room
+    })
+    typed.post('/', {schema: {
+                        body: RoomBody 
+                    }}, async(request, reply) =>{
         const room: RoomType = {id: nextId, ...request.body } 
         rooms.push(room)
         nextId++
         return reply.code(201).send(room)
     })
-    app.get('/', async() => rooms)
-    app.get<{ Params: { id: string } }>('/:id', async (request, reply) => {
-        const room = rooms.find((r) => r.id === Number(request.params.id))
-        if (!room) { return reply.status(404).send({ error: "Room not found" }) }
+    typed.patch('/:id', {schema: {
+                            params: Type.Object({id: Type.String({minLength: 1})}), 
+                            body: Type.Partial(RoomBody, { minProperties: 1}),
+                            response: {
+                                200: Room,
+                                404: Type.Object({error: Type.String()})
+                            }
+                        }}, async(request, reply) =>{
+        const room = rooms.find((r)=> r.id === Number(request.params.id))
+        if(!room) return reply.code(404).send({error: "Room not found"})
+        Object.assign(room, request.body)
         return room
     })
-    // app.post<{ Body: { name: string ; capacity: number } }>('/', async (request, reply) => {
-    //     const room: Room = { id: nextId, ...request.body} 
-    //     rooms.push(room)
-    //     nextId++
-    //     return reply.code(201).send(room)
-    // })
     app.delete<{ Params: { id: string } }>('/:id', async (request, reply) => {
         const room = rooms.find((r)=> r.id === Number(request.params.id))
         if(!room) return reply.code(404).send({Error: "Room not found"})
