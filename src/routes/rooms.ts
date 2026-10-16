@@ -2,6 +2,7 @@ import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { FastifyPluginAsync } from "fastify/types/plugin.js";
 import { Room, RoomBody, RoomType } from "../schema/room.ts";
 import { Type } from 'typebox'
+import { httpError } from "../plugins/errors.ts";
 
 type Room = { id: number ; name: string ; capacity: number }
 
@@ -38,7 +39,7 @@ export const roomsRoutes: FastifyPluginAsync = async (app) => {
                         }}, async(request, reply) =>{
         const { id } = request.params
         const room = rooms.find((r) => r.id === Number(id))
-        if (!room) { return reply.status(404).send({ error: "Room not found" }) }
+        if (!room) { throw new httpError(404, "Room not found") }
         return room
     })
     typed.post('/', {schema: {
@@ -58,13 +59,13 @@ export const roomsRoutes: FastifyPluginAsync = async (app) => {
                             }
                         }}, async(request, reply) =>{
         const room = rooms.find((r)=> r.id === Number(request.params.id))
-        if(!room) return reply.code(404).send({error: "Room not found"})
+        if(!room) throw new httpError(404, "Room not found")
         Object.assign(room, request.body)
         return room
     })
     app.delete<{ Params: { id: string } }>('/:id', async (request, reply) => {
         const room = rooms.find((r)=> r.id === Number(request.params.id))
-        if(!room) return reply.code(404).send({Error: "Room not found"})
+        if(!room) throw new httpError(404,'Room not found')
         rooms = rooms.filter((r) => r.id !== room.id)
         return reply.code(200).send({message: "Room Deleted"})
     })
