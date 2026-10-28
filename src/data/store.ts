@@ -11,5 +11,5 @@ export const rooms: RoomType[] = [
     { id: 7, name: "G727", capacity: 46 }
 ]
 export const bookings: BookingType[] = [
-    { id: 1, roomId: 1, userId: 1, startAt: '2024-06-01T10:00:00Z', endsAt: '2024-06-01T12:00:00Z' }
+    { id: 1, roomId: 1, userId: 1, startsAt: '2024-06-01T10:00:00Z', endsAt: '2024-06-01T12:00:00Z' }
 ]
