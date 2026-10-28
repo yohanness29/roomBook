@@ -3,7 +3,7 @@ import { Type, Static } from "@fastify/type-provider-typebox";
 export const RoomBody = Type.Object({
     name: Type.String({minLength: 1}),
     capacity: Type.Integer({minimum: 1})
-})
+}, {additionalProperties: false })
 export type RoomBodyType = Static<typeof RoomBody>
 
 export const Room = Type.Object({

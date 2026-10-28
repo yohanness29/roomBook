@@ -1,6 +1,6 @@
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { FastifyPluginAsync } from "fastify/types/plugin.js";
-import { Booking, BookingBody, BookingBodyType, BookingType } from "../schema/booking.ts";
+import { Booking, BookingBody, BookingBodyType, BookingType } from "../schemas/booking.ts";
 import { Type } from 'typebox'
 
 type Booking = { id: number, roomId: number, userId: number, startAt: string, endsAt: string }

@@ -8,7 +8,7 @@ export default fp(async(app)=>{
     })
 })
 
-export class httpError extends Error {
+export class HttpError extends Error {
     constructor(public statusCode: number, message: string){ 
         super(message) 
     }

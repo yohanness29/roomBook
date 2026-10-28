@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { roomsRoutes } from "./routes/rooms.ts";
-import { bookingRoutes } from "./routes/booking.ts";
+import { bookingRoutes } from "./routes/bookings.ts";
 import logger from "./plugins/logger.ts";
 import errors from "./plugins/errors.ts";
 
