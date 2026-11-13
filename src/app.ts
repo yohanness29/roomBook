@@ -12,6 +12,7 @@ export const buildApp = () => {
     app.register(prisma)
     app.register(swagger)
     app.register(logger)
+    app.get('/', async()=>({}))
     app.get('/health', async() => ({ status: 'ok' }))
     app.register(roomsRoutes, { prefix: '/rooms' });
     app.register(bookingRoutes, { prefix: '/bookings' })
