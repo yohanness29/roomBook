@@ -7,6 +7,17 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+enum Role {
+  STUDENT
+  ADMIN
+}
+model User{
+  id Int @id @default(autoincrement())
+  email String @unique
+  pwdHash String
+  role Role @default(STUDENT)
+  bookings Booking[]
+}
 model Room {
   id Int @id @default(autoincrement())
   name String @unique
@@ -18,6 +29,7 @@ model Booking{
   startsAt DateTime
   endsAt DateTime
   userId Int
-  room Room @relation(fields: [roomId], references: [id])
   roomId Int
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
 }

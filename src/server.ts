@@ -1,10 +1,10 @@
 import { buildApp } from "./app.ts";
 
-const app = buildApp()
+const app = buildApp();
 
 try {
-    await app.listen({ port: 8080, host: '0.0.0.0' });
+  await app.listen({ port: 8080, host: "0.0.0.0" });
 } catch (e) {
-    app.log.error(e)
-    process.exit(1)
+  app.log.error(e);
+  process.exit(1);
 }
