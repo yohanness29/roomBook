@@ -1,14 +1,12 @@
 import { TypeBoxTypeProvider, Type } from "@fastify/type-provider-typebox";
 import { FastifyPluginAsync } from "fastify/types/plugin.js";
-import { Room, RoomBody, RoomType } from "../schemas/room.ts";
+import { Room, RoomBody } from "../schemas/room.ts";
 import { HttpError } from "../plugins/errors.ts";
-import { rooms } from "../data/store.ts";
 import { IdParams } from "../schemas/common.ts";
-
-let nextId = 8
 
 export const roomsRoutes: FastifyPluginAsync = async (app) => {
   const typed = app.withTypeProvider<TypeBoxTypeProvider>()
+  const { prisma } = app
   typed.get('/', { schema: { 
     tags: ['rooms'],
     summary: 'Liste des salles',
@@ -16,20 +14,17 @@ export const roomsRoutes: FastifyPluginAsync = async (app) => {
       minCapacity: Type.Optional(Type.Integer({minimum:1}))
     }, {additionalProperties: false}), 
     response: { 200: Type.Array(Room) }
-  }}, async(request, )=> {
-    const {minCapacity} = request.query
-    if(minCapacity) return rooms.filter((r)=>r.capacity >= minCapacity )
-    return rooms
+  }}, async(request)=> {
+    return prisma.room.findMany({where: { capacity: { gte: request.query.minCapacity}}})
   })
   typed.get('/:id', { schema: {
     tags: ['rooms'],
     summary: "Recherche d'une salle",
     response: { 200: Room }, 
     params: IdParams
-  }}, async(request, reply) =>{
-    const { id } = request.params
-    const room = rooms.find((r) => r.id === id)
-    if (!room) { throw new HttpError(404, "Room not found") }
+  }}, async(request) =>{
+    const room = await prisma.room.findUnique({ where: { id: Number(request.params.id)}})
+    if (!room) throw new HttpError(404, 'salle introuvable')
     return room
   })
   typed.post('/', {schema: {
@@ -38,9 +33,7 @@ export const roomsRoutes: FastifyPluginAsync = async (app) => {
     body: RoomBody,
     response: { 201: Room }
   }}, async(request, reply) =>{
-    const room: RoomType = {id: nextId, ...request.body } 
-    rooms.push(room)
-    nextId++
+    const room = await prisma.room.create({data: request.body})
     return reply.code(201).send(room)
   })
   typed.patch('/:id', {schema: {
@@ -49,11 +42,8 @@ export const roomsRoutes: FastifyPluginAsync = async (app) => {
     params: IdParams, 
     body: Type.Partial(RoomBody, { minProperties: 1, additionalProperties: false}),
        response: { 200: Room }
-  }}, async(request, reply) =>{
-    const room = rooms.find((r)=> r.id === request.params.id)
-    if(!room) throw new HttpError(404, "Room not found")
-    Object.assign(room, request.body)
-    return room
+  }}, async(request) =>{
+    return await prisma.room.update({data: request.body, where: {id: request.params.id}})
   })
   typed.delete('/:id', { schema: {
     tags: ['rooms'],
@@ -61,9 +51,9 @@ export const roomsRoutes: FastifyPluginAsync = async (app) => {
     params: IdParams, 
     response: { 204: Type.Null() }
   }}, async (request, reply) => {
-    const i = rooms.findIndex((r) => r.id === request.params.id)
-    if (i === -1) throw new HttpError(404, 'Room not found')
-    rooms.splice(i, 1)
+    const room = await prisma.room.findUnique({where: {id: Number(request.params.id)}})
+    if (!room) throw new HttpError(404, 'Room not found')
+    await prisma.room.delete({where: {id: request.params.id}})
     return reply.code(204).send(null)
   })
 }

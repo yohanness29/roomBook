@@ -1,2 +1,6 @@
 node_modules
 dist
+dev.db
+.env
+src/generated/
+skills-lock.json

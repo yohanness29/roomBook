@@ -8,8 +8,9 @@
         "noUncheckedIndexedAccess": true,
         "allowImportingTsExtensions": true,
         "skipLibCheck": true,
-        "outDir": "dist",
-        "rootDir": "src"
+        "types": ["node"]
+        // "outDir": "dist",
+        // "rootDir": "src"
     },
-    "include": ["src"]
+    "include": ["src", "./prisma.config.ts"]
 }
